@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Task-05 • Social Media Platform (Single File)</title>
+<style>
+  :root{
+    --bg:#0d1b2a; --card:#1b263b; --muted:#415a77; --accent:#4cc9f0;
+    --text:#e0e1dd; --soft:#778da9; --success:#63e6be; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:linear-gradient(120deg,#0d1b2a,#0b3a5f); color:var(--text);
+  }
+  header{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; gap:12px; padding:14px 18px;
+    background:rgba(13,27,42,.85); backdrop-filter: blur(6px); border-bottom:1px solid #17324b;
+  }
+  header h1{font-size:18px; margin:0; letter-spacing:.3px}
+  header .tag{padding:4px 8px; background:var(--accent); color:#001219; border-radius:999px; font-weight:700; font-size:12px}
+  header .spacer{flex:1}
+  header select, header button{
+    background:#0f2a44; color:var(--text); border:1px solid #244864; border-radius:10px;
+    padding:8px 10px; font-weight:600;
+  }
+  header button{cursor:pointer}
+  .wrap{
+    display:grid; grid-template-columns: 270px minmax(0,1fr) 320px; gap:16px;
+    padding:16px; max-width:1300px; margin-inline:auto;
+  }
+  aside, main, .right{
+    background:var(--card); border:1px solid #22324a; border-radius:16px; padding:14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  }
+  .panel-title{margin:0 0 10px; font-size:14px; color:var(--soft); text-transform:uppercase; letter-spacing:.12em}
+  /* composer */
+  .composer{display:grid; gap:8px; background:#152235; padding:12px; border-radius:14px; border:1px dashed #2a4460}
+  .composer textarea{
+    width:100%; min-height:70px; resize:vertical; padding:10px; border-radius:10px;
+    background:#0f2034; color:var(--text); border:1px solid #213c59;
+  }
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .chip{background:#0e3550; border:1px solid #2a5f84; padding:6px 10px; border-radius:999px; font-size:12px}
+  input[type="file"]{display:none}
+  .btn, .btn-outline{
+    border-radius:12px; padding:10px 12px; border:0; font-weight:700; cursor:pointer;
+  }
+  .btn{background:var(--accent); color:#001219}
+  .btn-outline{background:transparent; border:1px solid #375b7a; color:#cde9ff}
+  .btn.small{padding:6px 8px; font-size:12px}
+  .muted{color:var(--soft); font-size:12px}
+  /* post */
+  .post{background:#122035; border:1px solid #22324a; border-radius:14px; padding:12px; margin:12px 0}
+  .post .hdr{display:flex; align-items:center; gap:10px}
+  .avatar{
+    width:36px; height:36px; border-radius:50%; background:linear-gradient(45deg,#62b6cb,#4cc9f0);
+    display:grid; place-items:center; color:#06202c; font-weight:900
+  }
+  .name{font-weight:800}
+  .time{font-size:12px; color:var(--soft)}
+  .content{margin:8px 0 10px; white-space:pre-wrap}
+  .media{border-radius:12px; overflow:hidden; margin:6px 0; border:1px solid #284761}
+  .media img, .media video{display:block; width:100%; height:auto; max-height:480px}
+  .actions{display:flex; gap:8px; align-items:center}
+  .actions button{background:#0f2a44; color:#cfe8ff; border:1px solid #274a68}
+  .count{font-size:12px; color:var(--soft)}
+  .comment-box{display:flex; gap:6px; margin-top:8px}
+  .comment-box input{
+    flex:1; padding:8px 10px; border-radius:10px; background:#0f2034; border:1px solid #203a58; color:var(--text)
+  }
+  .comments{margin-top:8px; border-top:1px dashed #28445f; padding-top:6px}
+  .comment{font-size:14px; padding:6px 0}
+  .tag{color:#8be9fd}
+  /* lists */
+  .user-item{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 6px; border-radius:10px}
+  .user-item:hover{background:#142944}
+  .empty{padding:8px; color:#97aabb; font-size:14px}
+  .notif{padding:10px; background:#0e2a42; border:1px solid #204863; border-radius:12px; margin:8px 0}
+  .notif.unread{border-color:var(--accent)}
+  .link{color:var(--accent); text-decoration:none}
+  .footer-note{padding:8px 16px; text-align:center; color:#9fb2c6; font-size:12px}
+  @media (max-width: 980px){
+    .wrap{grid-template-columns: 1fr; }
+    .right{order:3} aside{order:2} main{order:1}
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="tag">Task-05</span>
+  <h1>Social Media Platform • Demo (Local)</h1>
+  <div class="spacer"></div>
+  <label class="muted">Current user:</label>
+  <select id="userSelect" title="Switch user"></select>
+  <button id="newUserBtn" class="btn-outline">+ Add User</button>
+</header>
+
+<div class="wrap">
+  <aside>
+    <h3 class="panel-title">People to Follow</h3>
+    <div id="userList"></div>
+    <div class="footer-note">Follow others to see their posts and send them some ❤️</div>
+  </aside>
+
+  <main>
+    <section class="composer">
+      <div class="row" style="justify-content:space-between">
+        <div class="chip" id="youChip">You: </div>
+        <div class="muted">Tip: use #tags in your text</div>
+      </div>
+      <textarea id="postText" placeholder="What's happening?"></textarea>
+      <div id="mediaPreview" class="media" style="display:none"></div>
+      <div class="row">
+        <label for="mediaFile" class="btn-outline small">📎 Add Image/Video</label>
+        <input id="mediaFile" type="file" accept="image/*,video/*">
+        <button id="clearMedia" class="btn-outline small" style="display:none">Remove media</button>
+        <div class="spacer"></div>
+        <button id="postBtn" class="btn">Post</button>
+      </div>
+    </section>
+
+    <h3 class="panel-title" style="margin-top:16px">Feed</h3>
+    <div id="feed"></div>
+  </main>
+
+  <section class="right">
+    <h3 class="panel-title">Trending Tags</h3>
+    <div id="trending"></div>
+    <h3 class="panel-title" style="margin-top:16px">Notifications</h3>
+    <div id="notifications"></div>
+  </section>
+</div>
+
+<script>
+/* ========= Simple Local Data Layer ========= */
+const STORE_KEY = "smp-data-v1";
+const seedUsers = ["Isha","Meera","Ritika","Aditi","Pooja","Sana"];
+const now = () => new Date().toISOString();
+
+function loadStore(){
+  const saved = localStorage.getItem(STORE_KEY);
+  if(saved) return JSON.parse(saved);
+  // seed
+  const users = {};
+  seedUsers.forEach(u=>{
+    users[u]={bio:"", followers:[], following:[]};
+  });
+  const data = { users, posts: [], notifications: [], currentUser: seedUsers[0] };
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  return data;
+}
+function saveStore(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+let DB = loadStore();
+
+/* ========= Utilities ========= */
+function fmtTime(ts){
+  const d = new Date(ts); const diff = (Date.now() - d.getTime())/1000;
+  if(diff<60) return "just now";
+  if(diff<3600) return Math.floor(diff/60)+"m";
+  if(diff<86400) return Math.floor(diff/3600)+"h";
+  return d.toLocaleString();
+}
+function extractTags(text){
+  const tags = (text.match(/#[\w]+/g)||[]).map(t=>t.toLowerCase());
+  return [...new Set(tags)];
+}
+function userCanSee(post, user){
+  // show own posts or from followed users
+  if(post.author===user) return true;
+  return DB.users[user]?.following?.includes(post.author);
+}
+function notify(to, message){
+  if(to===DB.currentUser) return; // no self ping
+  DB.notifications.push({id:crypto.randomUUID(), to, message, ts:now(), read:false});
+}
+
+/* ========= UI Elements ========= */
+const userSelect = document.getElementById('userSelect');
+const newUserBtn = document.getElementById('newUserBtn');
+const youChip = document.getElementById('youChip');
+const userList = document.getElementById('userList');
+const postText = document.getElementById('postText');
+const postBtn = document.getElementById('postBtn');
+const feed = document.getElementById('feed');
+const trending = document.getElementById('trending');
+const notifications = document.getElementById('notifications');
+const mediaFile = document.getElementById('mediaFile');
+const mediaPreview = document.getElementById('mediaPreview');
+const clearMedia = document.getElementById('clearMedia');
+
+let pendingMedia = null; // {type:'image'|'video', url:dataURL}
+
+/* ========= Building Blocks ========= */
+function renderUsers(){
+  // dropdown
+  userSelect.innerHTML = Object.keys(DB.users).map(u =>
+    `<option value="${u}" ${u===DB.currentUser?'selected':''}>${u}</option>`
+  ).join('');
+  youChip.textContent = "You: " + DB.currentUser;
+
+  // list to follow
+  const list = Object.keys(DB.users).filter(u=>u!==DB.currentUser);
+  userList.innerHTML = list.map(u=>{
+    const me = DB.currentUser;
+    const following = DB.users[me].following.includes(u);
+    return `<div class="user-item">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar">${u[0]}</div>
+        <div><div class="name">${u}</div>
+        <div class="muted">${DB.users[u].followers.length} followers</div></div>
+      </div>
+      <button class="btn small" style="background:${following?'#244a64':'var(--accent)'};color:${following?'#cde9ff':'#001219'}"
+        onclick="toggleFollow('${u}')">${following?'Following':'Follow'}</button>
+    </div>`;
+  }).join('') || `<div class="empty">No other users yet. Add one!</div>`;
+}
+
+function toggleFollow(target){
+  const me = DB.currentUser;
+  const i = DB.users[me].following.indexOf(target);
+  if(i>=0){
+    DB.users[me].following.splice(i,1);
+    const j = DB.users[target].followers.indexOf(me);
+    if(j>=0) DB.users[target].followers.splice(j,1);
+  }else{
+    DB.users[me].following.push(target);
+    DB.users[target].followers.push(me);
+    notify(target, `${me} started following you`);
+  }
+  saveStore(); renderUsers(); renderFeed(); renderTrending();
+}
+
+function renderFeed(){
+  const me = DB.currentUser;
+  const posts = DB.posts
+    .filter(p=>userCanSee(p, me))
+    .sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  if(!posts.length){
+    feed.innerHTML = `<div class="empty">Your feed is empty. Follow people or make your first post!</div>`;
+    return;
+  }
+  feed.innerHTML = posts.map(p=>{
+    const youLiked = p.likes.includes(me);
+    const tags = p.tags.map(t=>`<a class="tag link" href="#" onclick="filterTag('${t}');event.preventDefault()">${t}</a>`).join(' ');
+    const media = p.media ? (p.media.type==='image'
+                  ? `<div class="media"><img src="${p.media.url}" alt="image"></div>`
+                  : `<div class="media"><video src="${p.media.url}" controls></video></div>`) : '';
+    const comments = p.comments.map(c=>`<div class="comment"><span class="name">${c.author}</span>: ${c.text} <span class="time">• ${fmtTime(c.ts)}</span></div>`).join('');
+    return `<article class="post" id="post-${p.id}">
+      <div class="hdr">
+        <div class="avatar">${p.author[0]}</div>
+        <div>
+          <div class="name">${p.author}</div>
+          <div class="time">${fmtTime(p.ts)} ${tags? '• '+tags : ''}</div>
+        </div>
+      </div>
+      <div class="content">${escapeHtml(p.text)}</div>
+      ${media}
+      <div class="actions">
+        <button class="btn-outline small" onclick="toggleLike('${p.id}')">${youLiked?'💙 Liked':'🤍 Like'}</button>
+        <span class="count">${p.likes.length} likes • ${p.comments.length} comments</span>
+      </div>
+      <div class="comments">${comments||''}</div>
+      <div class="comment-box">
+        <input id="c-${p.id}" placeholder="Write a comment..." onkeydown="if(event.key==='Enter'){addComment('${p.id}')}" />
+        <button class="btn-outline small" onclick="addComment('${p.id}')">Comment</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));
+}
+
+function toggleLike(id){
+  const me = DB.currentUser;
+  const p = DB.posts.find(x=>x.id===id);
+  const i = p.likes.indexOf(me);
+  if(i>=0) p.likes.splice(i,1); else {
+    p.likes.push(me);
+    if(p.author!==me) notify(p.author, `${me} liked your post`);
+  }
+  saveStore(); renderFeed();
+}
+
+function addComment(id){
+  const me = DB.currentUser;
+  const input = document.getElementById('c-'+id);
+  const text = input.value.trim();
+  if(!text) return;
+  const p = DB.posts.find(x=>x.id===id);
+  p.comments.push({author:me, text, ts:now()});
+  if(p.author!==me) notify(p.author, `${me} commented on your post`);
+  input.value='';
+  saveStore(); renderFeed();
+}
+
+function renderTrending(){
+  const map = {};
+  DB.posts.forEach(p => p.tags.forEach(t => { map[t]=(map[t]||0)+1; }));
+  const items = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  trending.innerHTML = items.length
+    ? items.map(([t,c])=>`<div class="user-item"><a href="#" class="link" onclick="filterTag('${t}');event.preventDefault()">${t}</a><span class="muted">${c}</span></div>`).join('')
+    : `<div class="empty">No tags yet. Add #tags to posts!</div>`;
+}
+
+function filterTag(tag){
+  // quick filter view
+  const me = DB.currentUser;
+  const posts = DB.posts.filter(p=>userCanSee(p, me) && p.tags.includes(tag))
+    .sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  feed.innerHTML = `<div class="chip">Filtering by ${tag}</div>` + (posts.map(p=>{
+    return `<article class="post"><div class="hdr"><div class="avatar">${p.author[0]}</div>
+      <div><div class="name">${p.author}</div><div class="time">${fmtTime(p.ts)}</div></div></div>
+      <div class="content">${escapeHtml(p.text)}</div></article>`;
+  }).join('') || `<div class="empty">No posts for ${tag}</div>`);
+}
+
+function renderNotifications(){
+  const me = DB.currentUser;
+  const list = DB.notifications.filter(n=>n.to===me).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  notifications.innerHTML = list.length ? list.map(n=>{
+    return `<div class="notif ${n.read?'':'unread'}" onclick="markRead('${n.id}')">
+      ${n.message}<div class="time">${fmtTime(n.ts)}</div>
+    </div>`;
+  }).join('') : `<div class="empty">No notifications yet.</div>`;
+}
+function markRead(id){
+  const n = DB.notifications.find(x=>x.id===id);
+  if(n){ n.read=true; saveStore(); renderNotifications(); }
+}
+
+/* ========= Composer (posting) ========= */
+mediaFile.addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = await fileToDataURL(file);
+  pendingMedia = { type: file.type.startsWith('video')?'video':'image', url };
+  drawPreview();
+});
+clearMedia.addEventListener('click', ()=>{
+  pendingMedia = null; mediaFile.value = ""; drawPreview();
+});
+function drawPreview(){
+  mediaPreview.style.display = pendingMedia? 'block':'none';
+  clearMedia.style.display = pendingMedia? 'inline-block':'none';
+  if(!pendingMedia){ mediaPreview.innerHTML=''; return; }
+  mediaPreview.innerHTML = pendingMedia.type==='image'
+    ? `<img src="${pendingMedia.url}" alt="preview">`
+    : `<video src="${pendingMedia.url}" controls></video>`;
+}
+function fileToDataURL(file){
+  return new Promise(res=>{
+    const r = new FileReader();
+    r.onload = () => res(r.result); r.readAsDataURL(file);
+  });
+}
+postBtn.addEventListener('click', ()=>{
+  const text = postText.value.trim();
+  if(!text && !pendingMedia){ alert("Write something or add media."); return; }
+  const tags = extractTags(text);
+  DB.posts.push({
+    id: crypto.randomUUID(),
+    author: DB.currentUser,
+    text, tags,
+    media: pendingMedia ? {...pendingMedia} : null,
+    likes: [], comments: [], ts: now()
+  });
+  postText.value = ""; pendingMedia = null; drawPreview();
+  saveStore(); renderFeed(); renderTrending();
+});
+
+/* ========= User switching & creation ========= */
+userSelect.addEventListener('change', (e)=>{
+  DB.currentUser = e.target.value; saveStore();
+  renderUsers(); renderFeed(); renderTrending(); renderNotifications();
+});
+newUserBtn.addEventListener('click', ()=>{
+  const name = prompt("Enter new username (letters/numbers, 3-16 chars):");
+  if(!name) return;
+  const ok = /^[A-Za-z0-9_]{3,16}$/.test(name);
+  if(!ok) return alert("Invalid username.");
+  if(DB.users[name]) return alert("User already exists.");
+  DB.users[name] = {bio:"", followers:[], following:[]};
+  DB.currentUser = name; saveStore();
+  renderUsers(); renderFeed(); renderTrending(); renderNotifications();
+});
+
+/* ========= Boot ========= */
+function boot(){
+  renderUsers(); renderFeed(); renderTrending(); renderNotifications();
+}
+boot();
+</script>
+</body>
+</html>

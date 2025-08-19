@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Local Store E-Commerce</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+    .product {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .product img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .cart {
+      background: white;
+      padding: 15px;
+      margin: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Local Store E-Commerce</h1>
+</header>
+
+<div class="products" id="productList"></div>
+
+<div class="cart" id="cart">
+  <h2>Shopping Cart</h2>
+  <ul id="cartItems"></ul>
+  <p><strong>Total: ₹<span id="totalPrice">0</span></strong></p>
+</div>
+
+<script>
+const products = [
+  { id: 1, name: "Product 1", price: 250, img: "https://via.placeholder.com/150" },
+  { id: 2, name: "Product 2", price: 400, img: "https://via.placeholder.com/150" },
+  { id: 3, name: "Product 3", price: 150, img: "https://via.placeholder.com/150" },
+  { id: 4, name: "Product 4", price: 300, img: "https://via.placeholder.com/150" }
+];
+
+let cart = [];
+
+function displayProducts() {
+  const productList = document.getElementById("productList");
+  productList.innerHTML = "";
+  products.forEach(product => {
+    productList.innerHTML += `
+      <div class="product">
+        <img src="${product.img}" alt="${product.name}">
+        <h3>${product.name}</h3>
+        <p>₹${product.price}</p>
+        <button onclick="addToCart(${product.id})">Add to Cart</button>
+      </div>
+    `;
+  });
+}
+
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  cart.push(product);
+  updateCart();
+}
+
+function updateCart() {
+  const cartItems = document.getElementById("cartItems");
+  const totalPrice = document.getElementById("totalPrice");
+  cartItems.innerHTML = "";
+  let total = 0;
+  cart.forEach(item => {
+    cartItems.innerHTML += `<li>${item.name} - ₹${item.price}</li>`;
+    total += item.price;
+  });
+  totalPrice.textContent = total;
+}
+
+displayProducts();
+</script>
+
+</body>
+</html>

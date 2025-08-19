@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Employee Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .form-container {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    .add-btn {
+      background: #28a745;
+      color: white;
+    }
+    .update-btn {
+      background: #007bff;
+      color: white;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+    table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Employee Management System</h2>
+
+<div class="form-container">
+  <input type="hidden" id="empIndex">
+  <input type="text" id="empName" placeholder="Employee Name">
+  <input type="text" id="empRole" placeholder="Role">
+  <input type="email" id="empEmail" placeholder="Email">
+  <button class="add-btn" onclick="addEmployee()">Add Employee</button>
+  <button class="update-btn" onclick="updateEmployee()" style="display:none;">Update Employee</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="employeeTable"></tbody>
+</table>
+
+<script>
+let employees = [];
+
+function renderTable() {
+  const table = document.getElementById('employeeTable');
+  table.innerHTML = "";
+  employees.forEach((emp, index) => {
+    table.innerHTML += `
+      <tr>
+        <td>${emp.name}</td>
+        <td>${emp.role}</td>
+        <td>${emp.email}</td>
+        <td>
+          <button class="update-btn" onclick="editEmployee(${index})">Edit</button>
+          <button class="delete-btn" onclick="deleteEmployee(${index})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function addEmployee() {
+  const name = document.getElementById('empName').value;
+  const role = document.getElementById('empRole').value;
+  const email = document.getElementById('empEmail').value;
+
+  if (name && role && email) {
+    employees.push({name, role, email});
+    renderTable();
+    clearForm();
+  } else {
+    alert("Please fill all fields");
+  }
+}
+
+function editEmployee(index) {
+  document.getElementById('empIndex').value = index;
+  document.getElementById('empName').value = employees[index].name;
+  document.getElementById('empRole').value = employees[index].role;
+  document.getElementById('empEmail').value = employees[index].email;
+
+  document.querySelector('.add-btn').style.display = "none";
+  document.querySelector('.update-btn').style.display = "inline-block";
+}
+
+function updateEmployee() {
+  const index = document.getElementById('empIndex').value;
+  employees[index].name = document.getElementById('empName').value;
+  employees[index].role = document.getElementById('empRole').value;
+  employees[index].email = document.getElementById('empEmail').value;
+
+  renderTable();
+  clearForm();
+  document.querySelector('.add-btn').style.display = "inline-block";
+  document.querySelector('.update-btn').style.display = "none";
+}
+
+function deleteEmployee(index) {
+  employees.splice(index, 1);
+  renderTable();
+}
+
+function clearForm() {
+  document.getElementById('empName').value = "";
+  document.getElementById('empRole').value = "";
+  document.getElementById('empEmail').value = "";
+  document.getElementById('empIndex').value = "";
+}
+</script>
+
+</body>
+</html>
